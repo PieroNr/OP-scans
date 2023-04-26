@@ -13,12 +13,7 @@ export default {
         screens: {
           TabOne: {
             screens: {
-              TabOneScreen: "one",
-            },
-          },
-          TabTwo: {
-            screens: {
-              TabTwoScreen: "two",
+              TabOneScreen: "scans",
             },
           },
         },
