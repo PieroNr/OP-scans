@@ -17,7 +17,7 @@
 
 ## 🚀 How to use
 
-- Install packages with `yarn` or `npm install`.
+- Install packages with `yarn` or `npm install`. Test
 - Run `yarn start` or `npm run start` to start the bundler.
 - Open the project in a React runtime to try it:
   - iOS: [Client iOS](https://itunes.apple.com/app/apple-store/id982107779)
