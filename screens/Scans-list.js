@@ -1,12 +1,13 @@
 import { StyleSheet } from "react-native";
-
-import EditScreenInfo from "../components/EditScreenInfo";
+import ChapterScraper from "../components/ChapterScraper";
 import { Text, View } from "../components/Themed";
 
-export default function TabOneScreen() {
+export default function ScansList() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>One piece</Text>
+      <ChapterScraper />
+
       {/* <View
         style={styles.separator}
         lightColor="#eee"

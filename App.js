@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useLoadedAssets } from "./hooks/useLoadedAssets";
 import Navigation from "./navigation";
+import ScansList from "./screens/Scans-list";
 import { useColorScheme } from "react-native";
 
 export default function App() {
@@ -16,7 +17,7 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
+        <ScansList />
         <StatusBar />
       </SafeAreaProvider>
     );
