@@ -1,11 +1,13 @@
 {
   "expo": {
     "name": "OPscans",
+    "owner": "opscans",
     "slug": "expo-template-tabs",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
+    "jsEngine": "jsc",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -15,18 +17,28 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "jsEngine": "jsc",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pieronr.opscans"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.pieronr.opscans"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8696c393-76aa-4193-aa5f-de7f78e9d36b"
+      }
     }
   }
 }
