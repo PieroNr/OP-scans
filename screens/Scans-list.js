@@ -1,12 +1,16 @@
 import { StyleSheet } from "react-native";
 import ChapterScraper from "../components/ChapterScraper";
-import { Text, View } from "../components/Themed";
+import HeaderScan from "../components/HeaderScan";
+import { View } from "../components/Themed";
+import { ScrollView } from "react-native";
 
 export default function ScansList() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>One piece</Text>
-      <ChapterScraper />
+      <ScrollView>
+        <HeaderScan />
+        <ChapterScraper />
+      </ScrollView>
 
       {/* <View
         style={styles.separator}
@@ -23,6 +27,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#1C1C1C",
   },
   title: {
     fontSize: 20,

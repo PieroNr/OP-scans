@@ -1,7 +1,7 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Chapter from '../models/Chapter';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Chapter from "../models/Chapter";
 
 const ChapterButton = ({ item, link }) => {
   const navigation = useNavigation();
@@ -14,7 +14,7 @@ const ChapterButton = ({ item, link }) => {
   const titleMatch = item.match(titleRegex);
   let title = titleMatch ? titleMatch[1] : "";
 
-  const lines = item.split('\n');
+  const lines = item.split("\n");
   let dateChapter = "";
   for (let i = lines.length - 1; i >= 0; i--) {
     if (lines[i].trim() !== "") {
@@ -23,31 +23,38 @@ const ChapterButton = ({ item, link }) => {
     }
   }
 
-  if(title == dateChapter) {
+  if (title == dateChapter) {
     title = "";
   }
 
   const chapter = new Chapter(number, title, dateChapter, link);
 
-
   return (
-    <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('Lecteur', { link: chapter.link })}>
-      <Text style={styles.buttonText}>One Piece {chapter.number} : {chapter.title}</Text>
+    <TouchableOpacity
+      style={styles.buttonContainer}
+      onPress={() => navigation.navigate("Lecteur", { link: chapter.link })}
+    >
+      <Text style={styles.buttonText}>
+        {chapter.number} : {chapter.title}
+      </Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    backgroundColor: '#e91e63',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
+    backgroundColor: "transparent",
+    borderColor: "#0C7700",
+    borderWidth: 1,
+    padding: 17,
+    paddingLeft: 24,
+    marginBottom: 20,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'left',
+    color: "white",
+    fontWeight: "400",
+    fontSize: 12,
+    textAlign: "left",
   },
 });
 

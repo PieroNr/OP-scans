@@ -1,24 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView } from 'react-native';
-import axios from 'axios';
-import cheerio from 'cheerio';
-import ChapterButton from './ChapterButton';
-import Carousel from 'react-native-snap-carousel';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
+} from "react-native";
+import axios from "axios";
+import cheerio from "cheerio";
+import ChapterButton from "./ChapterButton";
+import Carousel from "react-native-snap-carousel";
+import MenuScan from "./MenuScan";
+import { useFonts } from "expo-font";
 
 const ChapterScraper = () => {
   const [liElements, setLiElements] = useState([]);
   const [filteredLiElements, setFilteredLiElements] = useState([]);
   const [activeFilter, setActiveFilter] = useState(null);
+  const [activeTab, setActiveTab] = useState(true);
+  const [reversedFilteredLiElements, setReversedFilteredLiElements] = useState(
+    []
+  );
+
+  useEffect(() => {
+    // Mettre à jour reversedFilteredLiElements seulement lorsque filteredLiElements change
+    setReversedFilteredLiElements(filteredLiElements.reverse());
+  }, [filteredLiElements]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://www.scan-vf.net/one_piece');
+        const response = await axios.get("https://www.scan-vf.net/one_piece");
         const html = response.data;
         const $ = cheerio.load(html);
-        const liElements = $('ul.chapters').children('li').map((i, el) => $(el)).get();
-        
+        const liElements = $("ul.chapters")
+          .children("li")
+          .map((i, el) => $(el))
+          .get();
+
         liElements.reverse();
+
         setLiElements(liElements);
       } catch (error) {
         console.error(error);
@@ -31,7 +53,7 @@ const ChapterScraper = () => {
   useEffect(() => {
     // Apply the filter when the activeFilter changes
     if (activeFilter) {
-      const [start, end] = activeFilter.split(' à ');
+      const [start, end] = activeFilter.split(" à ");
       const filteredElements = liElements.filter((liElement, index) => {
         const liNumber = index + 1;
         return liNumber >= parseInt(start, 10) && liNumber <= parseInt(end, 10);
@@ -47,6 +69,17 @@ const ChapterScraper = () => {
   const handleFilterPress = (filter) => {
     setActiveFilter(filter);
   };
+
+  const [loaded] = useFonts({
+    GeologicaSemiBold: require("../assets/fonts/GeologicaSemiBold.ttf"),
+    GeologicaLight: require("../assets/fonts/GeologicaLight.ttf"),
+    GeologicaExtraLight: require("../assets/fonts/GeologicaExtraLight.ttf"),
+    GeologicaExtraLight: require("../assets/fonts/GeologicaRegular.ttf"),
+  });
+
+  if (!loaded) {
+    return null;
+  }
 
   const generateFilters = () => {
     const filters = [];
@@ -75,29 +108,46 @@ const ChapterScraper = () => {
     return filters;
   };
 
+  const handleVariable = (value) => {
+    // Faites quelque chose avec la variable
+    setActiveTab(value);
+    console.log(value);
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.filterList}>
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.filterContainer}
-        showsHorizontalScrollIndicator={false}
-        styles={styles.scrollView}
-      >{generateFilters()}</ScrollView>
-      </View>
-      <View style={styles.itemContainer}>
-      <FlatList
-        data={filteredLiElements.reverse()}
-        keyExtractor={(item, index) => index.toString()}
-        extraData={activeFilter}
-        renderItem={({ item }) =>  (
-          <View>
-            <ChapterButton item={item.text()} link={item.find('a').attr('href')}/>
+      <MenuScan onVariable={handleVariable} />
+      <Text>
+        {" "}
+        {activeTab ? (
+          <View style={styles.itemContainer}>
+            <FlatList
+              data={reversedFilteredLiElements}
+              keyExtractor={(item, index) => index.toString()}
+              extraData={activeFilter}
+              renderItem={({ item }) => (
+                <View>
+                  <ChapterButton
+                    item={item.text()}
+                    link={item.find("a").attr("href")}
+                  />
+                </View>
+              )}
+            />
+          </View>
+        ) : (
+          <View style={styles.filterList}>
+            <ScrollView
+              horizontal
+              contentContainerStyle={styles.filterContainer}
+              showsHorizontalScrollIndicator={false}
+              styles={styles.scrollView}
+            >
+              {generateFilters()}
+            </ScrollView>
           </View>
         )}
-      />
-      </View>
-      
+      </Text>
     </View>
   );
 };
@@ -106,44 +156,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    paddingTop: 0,
     paddingBottom: 0,
   },
   filterContainer: {
     marginBottom: 20,
-    
   },
   filterButton: {
     paddingVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#e91e63',
-    borderRadius: 5,
+    backgroundColor: "#1C1C1C",
     marginHorizontal: 5,
     height: 40,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
+    borderColor: "#0C7700",
+    borderWidth: 1,
   },
   activeFilterButton: {
-    backgroundColor: '#c2185b',
+    backgroundColor: "#0C7700",
   },
   filterButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontFamily: "GeologicaSemiBold",
   },
   itemContainer: {
     flex: 1,
     paddingHorizontal: 10,
     paddingTop: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: "#ccc",
   },
   liText: {
     marginBottom: 10,
   },
   filterList: {
-    borderBottomColor: '#ccc',
+    borderBottomColor: "#ccc",
     borderBottomWidth: 1,
     height: 50,
   },
-    });
+});
 
 export default ChapterScraper;
