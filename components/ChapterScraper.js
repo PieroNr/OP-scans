@@ -172,15 +172,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     paddingTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
   },
   liText: {
     marginBottom: 10,
   },
   filterList: {
-    borderBottomColor: "#ccc",
-    borderBottomWidth: 1,
     height: 50,
   },
 });
