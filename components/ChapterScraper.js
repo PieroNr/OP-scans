@@ -9,7 +9,6 @@ import {
 import axios from "axios";
 import cheerio from "cheerio";
 import ChapterButton from "./ChapterButton";
-import Carousel from "react-native-snap-carousel";
 import MenuScan from "./MenuScan";
 import { useFonts } from "expo-font";
 
