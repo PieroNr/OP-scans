@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
   ScrollView,
 } from "react-native";
 import axios from "axios";
@@ -117,37 +116,28 @@ const ChapterScraper = () => {
   return (
     <View style={styles.container}>
       <MenuScan onVariable={handleVariable} />
-      <Text>
-        {" "}
-        {activeTab ? (
-          <View style={styles.itemContainer}>
-            <FlatList
-              data={reversedFilteredLiElements}
-              keyExtractor={(item, index) => index.toString()}
-              extraData={activeFilter}
-              renderItem={({ item }) => (
-                <View>
-                  <ChapterButton
-                    item={item.text()}
-                    link={item.find("a").attr("href")}
-                  />
-                </View>
-              )}
+      {activeTab ? (
+        <View style={styles.itemContainer}>
+          {reversedFilteredLiElements.map((item, index) => (
+            <ChapterButton
+              key={index}
+              item={item.text()}
+              link={item.find("a").attr("href")}
             />
-          </View>
-        ) : (
-          <View style={styles.filterList}>
-            <ScrollView
-              horizontal
-              contentContainerStyle={styles.filterContainer}
-              showsHorizontalScrollIndicator={false}
-              styles={styles.scrollView}
-            >
-              {generateFilters()}
-            </ScrollView>
-          </View>
-        )}
-      </Text>
+          ))}
+        </View>
+      ) : (
+        <View style={styles.filterList}>
+          <ScrollView
+            horizontal
+            contentContainerStyle={styles.filterContainer}
+            showsHorizontalScrollIndicator={false}
+            styles={styles.scrollView}
+          >
+            {generateFilters()}
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 };
