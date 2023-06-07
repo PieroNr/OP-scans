@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import { hide } from "expo-splash-screen";
 
 const App = (props) => {
   const [activeTab, setActiveTab] = useState("filtres");

@@ -2,6 +2,7 @@ import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Chapter from "../models/Chapter";
+import { primaryColor, secondaryColor, colorText } from "../hooks/styles";
 
 const ChapterButton = ({ item, link }) => {
   const navigation = useNavigation();
@@ -43,15 +44,15 @@ const ChapterButton = ({ item, link }) => {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    backgroundColor: "transparent",
-    borderColor: "#0C7700",
+    backgroundColor: primaryColor,
+    borderColor: secondaryColor,
     borderWidth: 1,
     padding: 17,
     paddingLeft: 24,
     marginBottom: 20,
   },
   buttonText: {
-    color: "white",
+    color: colorText,
     fontWeight: "400",
     fontSize: 12,
     textAlign: "left",
