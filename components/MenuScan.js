@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useFonts } from "expo-font";
+import { secondaryColor, colorText } from "../hooks/styles";
 import {
   View,
   Text,
@@ -112,12 +113,12 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   activeTab: {
-    borderBottomColor: "#0C7700", // Couleur du soulignement actif
+    borderBottomColor: secondaryColor, // Couleur du soulignement actif
   },
   tabText: {
     fontSize: 14,
     fontFamily: "GeologicaSemiBold",
-    color: "#fff",
+    color: colorText,
     textTransform: "uppercase",
   },
   tabUnderline: {
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     height: 1,
-    backgroundColor: "#0C7700", // Couleur du soulignement
+    backgroundColor: secondaryColor, // Couleur du soulignement
   },
 });
 

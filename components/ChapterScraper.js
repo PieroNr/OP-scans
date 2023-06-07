@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { primaryColor, secondaryColor, colorText } from "../hooks/styles";
 import {
   View,
   Text,
@@ -154,17 +155,17 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: "#1C1C1C",
+    backgroundColor: primaryColor,
     marginHorizontal: 5,
     height: 40,
-    borderColor: "#0C7700",
+    borderColor: secondaryColor,
     borderWidth: 1,
   },
   activeFilterButton: {
-    backgroundColor: "#0C7700",
+    backgroundColor: secondaryColor,
   },
   filterButtonText: {
-    color: "white",
+    color: colorText,
     fontFamily: "GeologicaSemiBold",
   },
   itemContainer: {

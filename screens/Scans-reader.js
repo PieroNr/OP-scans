@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image } from "react-native";
 import ScanScraper from "../components/ScanScraper";
+import { primaryColor } from "../hooks/styles";
 
 const ScansReader = ({ route }) => {
   const { link } = route.params;
@@ -14,7 +15,7 @@ const ScansReader = ({ route }) => {
 
 const styles = {
   container: {
-    backgroundColor: "#1C1C1C",
+    backgroundColor: primaryColor,
     height: "100%",
   },
 };

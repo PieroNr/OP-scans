@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { primaryColor } from "../hooks/styles";
 
 export default function NotFoundScreen({ navigation }) {
   return (
@@ -17,7 +18,7 @@ export default function NotFoundScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: primaryColor,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,

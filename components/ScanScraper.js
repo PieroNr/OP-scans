@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { primaryColor, secondaryColor } from "../hooks/styles";
 import {
   View,
   Image,
@@ -65,7 +66,7 @@ const ScanScraper = ({ link }) => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0C7700" />
+        <ActivityIndicator size="large" color={secondaryColor} />
       </View>
     );
   }
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     height: "auto",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1C1C1C",
+    backgroundColor: primaryColor,
   },
   image: {
     width: "100%",

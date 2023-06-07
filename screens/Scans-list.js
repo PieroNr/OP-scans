@@ -3,6 +3,7 @@ import ChapterScraper from "../components/ChapterScraper";
 import HeaderScan from "../components/HeaderScan";
 import { View } from "../components/Themed";
 import { ScrollView } from "react-native";
+import { primaryColor } from "../hooks/styles";
 
 export default function ScansList() {
   return (
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#1C1C1C",
+    backgroundColor: primaryColor,
   },
   title: {
     fontSize: 20,
