@@ -7,8 +7,14 @@ import { useLoadedAssets } from "./hooks/useLoadedAssets";
 import Navigation from "./navigation/Navigation";
 import ScansList from "./screens/Scans-list";
 import { useColorScheme } from "react-native";
+import React, { useEffect } from "react";
+import { loadFonts } from "./hooks/styles";
 
 export default function App() {
+  useEffect(() => {
+    loadFonts();
+  }, []);
+
   const isLoadingComplete = useLoadedAssets();
   const colorScheme = useColorScheme();
 
@@ -17,7 +23,7 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation/>
+        <Navigation />
         <StatusBar />
       </SafeAreaProvider>
     );

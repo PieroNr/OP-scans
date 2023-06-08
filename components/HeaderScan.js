@@ -1,20 +1,8 @@
 import React from "react";
 import { ScrollView, View, Text, StyleSheet, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFonts } from "expo-font";
 
 const HeaderScan = () => {
-  const [loaded] = useFonts({
-    GeologicaSemiBold: require("../assets/fonts/GeologicaSemiBold.ttf"),
-    GeologicaLight: require("../assets/fonts/GeologicaLight.ttf"),
-    GeologicaExtraLight: require("../assets/fonts/GeologicaExtraLight.ttf"),
-    GeologicaExtraLight: require("../assets/fonts/GeologicaRegular.ttf"),
-  });
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <Image
@@ -82,7 +70,7 @@ const styles = StyleSheet.create({
 
   desc: {
     color: "white",
-    fontFamily: "GeologicaExtraLight",
+    fontFamily: "GeologicaLight",
     fontSize: 12,
     marginTop: 20,
     marginBottom: 40,

@@ -17,7 +17,11 @@ const Navigation = () => {
           component={ScansList}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Lecteur" component={ScansReader} />
+        <Stack.Screen
+          name="Lecteur"
+          component={ScansReader}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
