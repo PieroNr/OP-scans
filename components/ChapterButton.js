@@ -5,7 +5,7 @@ import Chapter from "../models/Chapter";
 import { primaryColor, secondaryColor, colorText, colorTextReaded } from "../hooks/styles";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { set } from "react-native-reanimated";
+
 
 const ChapterButton = ({ item, link, readedChapters, progressChapters, setReadedChapters, setProgressChapters }) => {
 
@@ -84,12 +84,13 @@ const ChapterButton = ({ item, link, readedChapters, progressChapters, setReaded
     }
   };
 
-  const handleSlideChange = (current, total) => {
+  const handleSlideChange = (current, total,key) => {
     setCurrentSlide(current);
     setTotalSlides(total);
     
     if (current === total) {
       markChapterAsReaded(chapter.number);
+      AsyncStorage.removeItem(key);
     }
   };
 
@@ -103,7 +104,7 @@ const ChapterButton = ({ item, link, readedChapters, progressChapters, setReaded
         if (!isInProgress) {
           markChapterAsInProgress(chapter.number);
         } 
-        navigation.navigate("Lecteur", { link: chapter.link,  handleSlideChange: handleSlideChange, currentSlide: currentSlide, totalSlides: totalSlides});
+        navigation.navigate("Lecteur", { chapter: chapter,  handleSlideChange: handleSlideChange, currentSlide: currentSlide, totalSlides: totalSlides});
         
       }}
     >

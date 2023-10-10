@@ -62,11 +62,9 @@ const ChapterScraper = () => {
       try {
         const readedChaptersData = await AsyncStorage.getItem("readedChapters");
         if (readedChaptersData) {
-          console.log("readedChaptersData", readedChaptersData);
           const readedChaptersArray = JSON.parse(readedChaptersData);
           setReadedChapters(readedChaptersArray);
         } else {
-          console.log("readedChaptersData not found");
           setReadedChapters([]);
           await AsyncStorage.setItem("readedChapters", JSON.stringify([]));
         }
@@ -75,7 +73,6 @@ const ChapterScraper = () => {
           "progressChapters"
         );
         if (progressChaptersData) {
-          console.log("progressChaptersData", readedChaptersData);
           const progressChaptersArray = JSON.parse(progressChaptersData);
           setProgressChapters(progressChaptersArray);
         } else {
@@ -154,11 +151,7 @@ const ChapterScraper = () => {
 
   const handleVariable = (value) => {
     setActiveTab(value);
-    console.log(value);
   };
-
-  console.log("readedChapters", readedChapters);
-  console.log("progressChapters", progressChapters);
 
   return (
     <View style={styles.container}>

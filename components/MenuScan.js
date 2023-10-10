@@ -15,9 +15,7 @@ const App = (props) => {
   const animationValueChap = useRef(new Animated.Value(0)).current;
 
   const handleClick = (value) => {
-    // Appeler la fonction de rappel avec la variable en tant qu'argument
     props.onVariable(value);
-    console.log(value);
   };
 
   const handleTabPress = (tab) => {

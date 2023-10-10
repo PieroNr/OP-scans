@@ -2,23 +2,25 @@ import React, { useEffect, useState, useRef } from "react";
 import { primaryColor, secondaryColor } from "../hooks/styles";
 import {
   View,
-  Image,
   StyleSheet,
   ActivityIndicator,
   FlatList,
   Dimensions,
+  Image
 } from "react-native";
 import ImageZoomViewer from "react-native-image-zoom-viewer";
 import axios from "axios";
 import cheerio from "cheerio";
-import { set } from "react-native-reanimated";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ScanScraper = ({ link, handleSlideChange }) => {
+const ScanScraper = ({ chapter, handleSlideChange }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(1);
   const [totalSlides, setTotalSlides] = useState(50);
   const screenWidth = Dimensions.get("window").width;
+
+  const generateChapterCacheKey = (chapterNumber) => `chapter_${chapterNumber}_images_limk`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,18 +28,25 @@ const ScanScraper = ({ link, handleSlideChange }) => {
       let currentPage = 1;
       let hasMoreImages = true;
 
+      const cachedImageLinks = await getChapterImageLinksFromCache(chapter.number);
+
+      if (cachedImageLinks) {
+        setImages(cachedImageLinks);
+        setIsLoading(false);
+        setTotalSlides(cachedImageLinks.length);
+        return;
+      }
       while (hasMoreImages) {
         try {
-          const response = await axios.get(`${link}/${currentPage}`);
+          const response = await axios.get(`${chapter.link}/${currentPage}`);
 
           const html = response.data;
           const $ = cheerio.load(html);
           const scanImages = $("img.scan-page");
 
           if (scanImages.length > 0) {
-            scanImages.each((index, element) => {
+            scanImages.each(async (index, element) => {
               const imageUrl = $(element).attr("src");
-
               scannedImages.push(imageUrl.trimStart().trimEnd());
               setImages(scannedImages);
             });
@@ -52,13 +61,33 @@ const ScanScraper = ({ link, handleSlideChange }) => {
           hasMoreImages = false;
         }
       }  
-      
+      await cacheChapterImageLinks(chapter.number, scannedImages);
       setImages(scannedImages);
       
     };
 
     fetchData();
-  }, [link]);
+  }, [chapter]);
+
+  const cacheChapterImageLinks = async (chapterNumber, imageLinks) => {
+    try {
+      const key = generateChapterCacheKey(chapterNumber);
+      await AsyncStorage.setItem(key, JSON.stringify(imageLinks));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getChapterImageLinksFromCache = async (chapterNumber) => {
+    try {
+      const key = generateChapterCacheKey(chapterNumber);
+      const cachedLinks = await AsyncStorage.getItem(key);
+      return cachedLinks ? JSON.parse(cachedLinks) : null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
 
 
   const renderImageItem = ({ item }) => {
@@ -90,7 +119,8 @@ const ScanScraper = ({ link, handleSlideChange }) => {
         const slideSize = event.nativeEvent.layoutMeasurement.width;
         const slide = event.nativeEvent.contentOffset.x / slideSize;
         setCurrentSlide(parseInt(slide+1));
-        handleSlideChange(currentSlide, totalSlides)
+        handleSlideChange(currentSlide, totalSlides, generateChapterCacheKey(chapter.number));
+
         
       }}
       horizontal
