@@ -9,28 +9,35 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  ScrollView, 
 } from "react-native";
+import { CheckBox } from '@rneui/themed';
 import axios from "axios";
 import cheerio from "cheerio";
 import ChapterButton from "./ChapterButton";
 import MenuScan from "./MenuScan";
 import { useFonts } from "expo-font";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FontAwesome } from "@expo/vector-icons";
+import * as Print from 'expo-print';
+import { shareAsync } from 'expo-sharing';
+
 
 const ChapterScraper = () => {
   const [liElements, setLiElements] = useState([]);
   const [filteredLiElements, setFilteredLiElements] = useState([]);
   const [activeFilter, setActiveFilter] = useState(null);
+  const [filters, setFilters] = useState([]);
   const [activeTab, setActiveTab] = useState(true);
   const [reversedFilteredLiElements, setReversedFilteredLiElements] = useState(
     []
   );
   const [readedChapters, setReadedChapters] = useState([]);
   const [progressChapters, setProgressChapters] = useState([]);
+  const [downloadEnabled, setDownloadEnabled] = useState(false);
+  const [downloadActivate, setDownloadActivate] = useState(false);
 
   useEffect(() => {
-    // Mettre à jour reversedFilteredLiElements seulement lorsque filteredLiElements change
     setReversedFilteredLiElements(filteredLiElements.reverse());
   }, [filteredLiElements]);
 
@@ -57,45 +64,12 @@ const ChapterScraper = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch readedChapters and progressChapters from AsyncStorage
-    const fetchChaptersStatus = async () => {
-      try {
-        const readedChaptersData = await AsyncStorage.getItem("readedChapters");
-        if (readedChaptersData) {
-          console.log("readedChaptersData", readedChaptersData);
-          const readedChaptersArray = JSON.parse(readedChaptersData);
-          setReadedChapters(readedChaptersArray);
-        } else {
-          console.log("readedChaptersData not found");
-          setReadedChapters([]);
-          await AsyncStorage.setItem("readedChapters", JSON.stringify([]));
-        }
-
-        const progressChaptersData = await AsyncStorage.getItem(
-          "progressChapters"
-        );
-        if (progressChaptersData) {
-          console.log("progressChaptersData", readedChaptersData);
-          const progressChaptersArray = JSON.parse(progressChaptersData);
-          setProgressChapters(progressChaptersArray);
-        } else {
-          setProgressChapters([]);
-          await AsyncStorage.setItem(
-            "progressChapters",
-            JSON.stringify([])
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching chapter statuses:", error);
-      }
-    };
 
     fetchChaptersStatus();
   }, []);
   
 
   useEffect(() => {
-    // Apply the filter when the activeFilter changes
     if (activeFilter) {
       const [start, end] = activeFilter.split(" à ");
       const filteredElements = liElements.filter((liElement, index) => {
@@ -105,13 +79,48 @@ const ChapterScraper = () => {
       const filteredTexts = filteredElements.map((liElement) => liElement);
       setFilteredLiElements(filteredTexts);
     } else {
+      if (liElements.length !== 0) {
+        const numFilters = Math.ceil(liElements.length / 200);
+        setActiveFilter(`${(numFilters-1)*200+1} à ${liElements.length}`);
+    
+      }
       const allTexts = liElements.map((liElement) => liElement);
       setFilteredLiElements(allTexts);
     }
   }, [activeFilter, liElements]);
 
+  const fetchChaptersStatus = async () => {
+    try {
+      const readedChaptersData = await AsyncStorage.getItem("readedChapters");
+      if (readedChaptersData) {
+        const readedChaptersArray = JSON.parse(readedChaptersData);
+        setReadedChapters(readedChaptersArray);
+      } else {
+        setReadedChapters([]);
+        await AsyncStorage.setItem("readedChapters", JSON.stringify([]));
+      }
+
+      const progressChaptersData = await AsyncStorage.getItem(
+        "progressChapters"
+      );
+      if (progressChaptersData) {
+        const progressChaptersArray = JSON.parse(progressChaptersData);
+        setProgressChapters(progressChaptersArray);
+      } else {
+        setProgressChapters([]);
+        await AsyncStorage.setItem(
+          "progressChapters",
+          JSON.stringify([])
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching chapter statuses:", error);
+    }
+  };
+
   const handleFilterPress = (filter) => {
     setActiveFilter(filter);
+    renderTheComponent();
   };
 
   const [loaded] = useFonts({
@@ -124,7 +133,6 @@ const ChapterScraper = () => {
   if (!loaded) {
     return null;
   }
-
   
   const generateFilters = () => {
     const filters = [];
@@ -135,7 +143,6 @@ const ChapterScraper = () => {
       const start = i * 200 + 1;
       const end = Math.min((i + 1) * 200, totalItems);
       const filter = `${start} à ${end}`;
-
       filters.push(
         <TouchableOpacity
           key={i}
@@ -145,28 +152,59 @@ const ChapterScraper = () => {
           <Text style={styles.filterButtonText}>{filter}</Text>
         </TouchableOpacity>
       );
-
       
+
     }
-
-    return filters;
+    return filters.reverse();
   };
 
-  const handleVariable = (value) => {
-    setActiveTab(value);
-    console.log(value);
-  };
+  const downloadChapter = async (link) => {
+      setDownloadActivate(true);
+      let currentPage = 1;
+      let hasMoreImages = true;
+      let generateHTML = "<html><body><style>img {width: 100%; height: 100%; object-fit: contain; overflow: hidden;} .imgContainer{width: 100%; height: 100%;} *{margin: 0;}</style><div>";
+      while (hasMoreImages) {
+        try {
+          const response = await axios.get(`${link}/${currentPage}`);
 
-  console.log("readedChapters", readedChapters);
-  console.log("progressChapters", progressChapters);
+          const html = response.data;
+          const $ = cheerio.load(html);
+          const scanImages = $("img.scan-page");
 
-  return (
-    <View style={styles.container}>
-      <MenuScan onVariable={handleVariable} />
-      {activeTab ? (
-        <View style={styles.itemContainer}>
-          {reversedFilteredLiElements.map((item, index) => (
+          if (scanImages.length > 0) {
+            scanImages.each(async (index, element) => {
+              generateHTML += `<div class="imgContainer"><img src="${$(element).attr("src").trimStart().trimEnd()}"/></div>`;
+              
+            });
+            currentPage++;
+            //setIsLoading(false);
+          } else {
+            hasMoreImages = false;
+            generateHTML += "</div></body></html>";
+          }
+        } catch (error) {
+          console.error(error);
+          hasMoreImages = false;
+        }
+      }
+      const pdf = await Print.printToFileAsync({ html: generateHTML });
+      const { uri } = pdf;
+      await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Partager le chapitre' });
+      setDownloadActivate(false);
+      return uri;
+
+  }
+
+  const generateChapterButtons = () => {
+    const chapterButtons = [];
+    reversedFilteredLiElements.forEach((item, index) => {
+      chapterButtons.push(
+        <View
+            key={index}
+            style={styles.chapterButtonContainer}
+          >
             <ChapterButton
+              
               key={index}
               item={item.text()}
               link={item.find("a").attr("href")}
@@ -174,11 +212,36 @@ const ChapterScraper = () => {
               progressChapters={progressChapters}
               setReadedChapters={setReadedChapters}
               setProgressChapters={setProgressChapters}
+              downloadEnabled={downloadEnabled}
+              downloadChapter={downloadChapter}
+              downloadActivate={downloadActivate}
             />
-          ))}
-        </View>
-      ) : (
-        <View style={styles.filterList}>
+            
+            </View>
+      );
+    });
+    
+
+    return chapterButtons;
+  }
+
+  const renderTheComponent = () => {
+    setActiveTab(false);
+    setInterval(() => {
+      setActiveTab(true);
+    }
+    , 0);
+  }
+
+
+  const handleVariable = (value) => {
+    setActiveTab(value);
+  };
+  
+  return (
+    <View style={styles.container}>
+      <MenuScan onVariable={handleVariable} />
+      <View style={styles.filterList}>
           <ScrollView
             horizontal
             contentContainerStyle={styles.filterContainer}
@@ -188,6 +251,24 @@ const ChapterScraper = () => {
             {generateFilters()}
           </ScrollView>
         </View>
+      <CheckBox
+           containerStyle={styles.checkbox}
+           checked={downloadEnabled}
+           onPress={() => setDownloadEnabled(!downloadEnabled)}
+           iconType="material-community"
+           checkedIcon="checkbox-marked"
+           uncheckedIcon="checkbox-blank-outline"
+           checkedColor="#FEB81C"
+           title="Télécharger les chapitres"
+           textStyle={[{color: colorText, fontFamily: "GeologicaSemiBold"}]}
+           
+         />
+      {activeTab ? (
+        <View style={styles.itemContainer}>
+          {generateChapterButtons()}
+        </View>
+      ) : (
+        <View></View>
       )}
     </View>
   );
@@ -230,7 +311,37 @@ const styles = StyleSheet.create({
   },
   filterList: {
     height: 50,
+    marginLeft: 5
   },
+  checkboxContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  checkbox: {
+    color: colorText,
+    fontFamily: "GeologicaSemiBold",
+    backgroundColor: '#393939',
+    marginBottom: 20,
+    
+  },
+
+  chapterButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+
+  },
+  downloadIcon: {
+    width:'10%',
+    height: '100%',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    
+    
+  }
 });
 
 export default ChapterScraper;

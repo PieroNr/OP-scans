@@ -15,9 +15,7 @@ const App = (props) => {
   const animationValueChap = useRef(new Animated.Value(0)).current;
 
   const handleClick = (value) => {
-    // Appeler la fonction de rappel avec la variable en tant qu'argument
     props.onVariable(value);
-    console.log(value);
   };
 
   const handleTabPress = (tab) => {
@@ -83,7 +81,7 @@ const App = (props) => {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity
+      {/*<TouchableOpacity
         style={[styles.tab, activeTab === "filters" && styles.activeTab]}
         onPress={() => {
           handleTabPress("filters");
@@ -94,7 +92,7 @@ const App = (props) => {
         <Animated.View
           style={[styles.tabUnderline, { width: tabUnderlineWidthChap }]}
         />
-      </TouchableOpacity>
+      </TouchableOpacity>*/}
     </View>
   );
 };
