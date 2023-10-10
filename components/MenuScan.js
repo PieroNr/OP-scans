@@ -81,7 +81,7 @@ const App = (props) => {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity
+      {/*<TouchableOpacity
         style={[styles.tab, activeTab === "filters" && styles.activeTab]}
         onPress={() => {
           handleTabPress("filters");
@@ -92,7 +92,7 @@ const App = (props) => {
         <Animated.View
           style={[styles.tabUnderline, { width: tabUnderlineWidthChap }]}
         />
-      </TouchableOpacity>
+      </TouchableOpacity>*/}
     </View>
   );
 };

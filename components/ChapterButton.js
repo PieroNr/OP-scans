@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Chapter from "../models/Chapter";
 import { primaryColor, secondaryColor, colorText, colorTextReaded } from "../hooks/styles";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FAB } from '@rneui/themed';
 
 
-const ChapterButton = ({ item, link, readedChapters, progressChapters, setReadedChapters, setProgressChapters }) => {
+const ChapterButton = ({ item, link, readedChapters, progressChapters, setReadedChapters, setProgressChapters, downloadEnabled, downloadChapter, downloadActivate }) => {
 
   const [isReaded, setIsReaded] = useState(false);
   const [isInProgress, setIsInProgress] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(1);
   const [totalSlides, setTotalSlides] = useState(50);
+  const [downloading, setDownloading] = useState(false);
 
   
   const navigation = useNavigation();
@@ -43,6 +45,12 @@ const ChapterButton = ({ item, link, readedChapters, progressChapters, setReaded
   useEffect(() => {
     checkChapterStatus(chapter.number);
   }, []);
+
+  useEffect(() => {
+    if (!downloadActivate) {
+      setDownloading(false);
+    }
+  }, [downloadActivate]);
 
   const checkChapterStatus = (noChapter) => {
     setIsReaded(readedChapters.includes(noChapter));
@@ -96,9 +104,11 @@ const ChapterButton = ({ item, link, readedChapters, progressChapters, setReaded
 
 
   return (
+    <View style={styles.chapterButtonContainer}>
     <TouchableOpacity
       style={[
-        styles.buttonContainer, // Appliquer le style jaune si le chapitre est "inProgress"
+        styles.buttonContainer,
+        downloadEnabled && {width: "85%"},
       ]}
       onPress={() => {
         if (!isInProgress) {
@@ -118,6 +128,27 @@ const ChapterButton = ({ item, link, readedChapters, progressChapters, setReaded
         styles.checkReaded
       ]} size={15} color="#1C1C1C" />}
     </TouchableOpacity>
+    {downloadEnabled && !downloading && (
+      <TouchableOpacity style={styles.downloadIcon} onPress={() => {
+        setDownloading(true)
+        downloadChapter(chapter.link) 
+         
+      }
+        }>
+        <FontAwesome name="download" style={{color: "#feb81c", textAlign: 'center', margin: 'auto'}} size={25}/>
+      </TouchableOpacity>
+    )}
+    {downloadEnabled && downloading && downloadActivate && (
+       <FAB
+       loading
+       visible={downloading}
+       icon={{ name: 'add', color: 'white' }}
+       style={{ marginLeft: 12 }}
+       color="transparent"
+       size="15"
+     />
+      )}
+    </View>
   );
 };
 
@@ -126,14 +157,22 @@ const styles = StyleSheet.create({
     backgroundColor: primaryColor, 
     borderColor: secondaryColor, 
     borderWidth: 1,
-    
+    width: '100%',
     paddingLeft: 24,
     paddingRight: 0,
-    marginBottom: 20,
+    
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     
+  },
+  chapterButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    
+
   },
 
   buttonText: {
