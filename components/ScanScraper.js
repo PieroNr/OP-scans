@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { primaryColor, secondaryColor } from "../hooks/styles";
 import {
   View,
@@ -11,10 +11,13 @@ import {
 import ImageZoomViewer from "react-native-image-zoom-viewer";
 import axios from "axios";
 import cheerio from "cheerio";
+import { set } from "react-native-reanimated";
 
-const ScanScraper = ({ link }) => {
+const ScanScraper = ({ link, handleSlideChange }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [images, setImages] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(1);
+  const [totalSlides, setTotalSlides] = useState(50);
   const screenWidth = Dimensions.get("window").width;
 
   useEffect(() => {
@@ -36,29 +39,32 @@ const ScanScraper = ({ link }) => {
               const imageUrl = $(element).attr("src");
 
               scannedImages.push(imageUrl.trimStart().trimEnd());
+              setImages(scannedImages);
             });
             currentPage++;
+            setIsLoading(false);
           } else {
             hasMoreImages = false;
+            setTotalSlides(scannedImages.length);
           }
         } catch (error) {
           console.error(error);
           hasMoreImages = false;
         }
-      }
-
+      }  
+      
       setImages(scannedImages);
-      setIsLoading(false);
-      console.log(scannedImages);
+      
     };
 
     fetchData();
   }, [link]);
 
+
   const renderImageItem = ({ item }) => {
     return (
       <View style={[styles.imageContainer, { width: screenWidth }]}>
-        <Image source={{ uri: item }} style={styles.image} />
+        <Image source={{ uri: item }} style={styles.image}/>
       </View>
     );
   };
@@ -80,6 +86,13 @@ const ScanScraper = ({ link }) => {
       data={images}
       renderItem={renderImageItem}
       keyExtractor={(item, index) => index.toString()}
+      onScroll={(event) => {
+        const slideSize = event.nativeEvent.layoutMeasurement.width;
+        const slide = event.nativeEvent.contentOffset.x / slideSize;
+        setCurrentSlide(parseInt(slide+1));
+        handleSlideChange(currentSlide, totalSlides)
+        
+      }}
       horizontal
       pagingEnabled
       showsHorizontalScrollIndicator={false}

@@ -4,11 +4,13 @@ import ScanScraper from "../components/ScanScraper";
 import { primaryColor } from "../hooks/styles";
 
 const ScansReader = ({ route }) => {
-  const { link } = route.params;
+  console.log(route.params);
+  const { link, handleSlideChange, currentSlide, totalSlides } = route.params;
+
 
   return (
     <View style={styles.container}>
-      <ScanScraper link={link} />
+      <ScanScraper link={link} handleSlideChange={handleSlideChange}/>
     </View>
   );
 };

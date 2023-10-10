@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { primaryColor, secondaryColor, colorText } from "../hooks/styles";
+import {
+  primaryColor,
+  secondaryColor,
+  colorText,
+} from "../hooks/styles";
 import {
   View,
   Text,
@@ -12,6 +16,7 @@ import cheerio from "cheerio";
 import ChapterButton from "./ChapterButton";
 import MenuScan from "./MenuScan";
 import { useFonts } from "expo-font";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChapterScraper = () => {
   const [liElements, setLiElements] = useState([]);
@@ -21,6 +26,8 @@ const ChapterScraper = () => {
   const [reversedFilteredLiElements, setReversedFilteredLiElements] = useState(
     []
   );
+  const [readedChapters, setReadedChapters] = useState([]);
+  const [progressChapters, setProgressChapters] = useState([]);
 
   useEffect(() => {
     // Mettre à jour reversedFilteredLiElements seulement lorsque filteredLiElements change
@@ -33,21 +40,59 @@ const ChapterScraper = () => {
         const response = await axios.get("https://www.scan-vf.net/one_piece");
         const html = response.data;
         const $ = cheerio.load(html);
-        const liElements = $("ul.chapters")
+        const fetchedLiElements = $("ul.chapters")
           .children("li")
           .map((i, el) => $(el))
           .get();
-
-        liElements.reverse();
-
-        setLiElements(liElements);
+  
+        fetchedLiElements.reverse();
+  
+        setLiElements(fetchedLiElements);
       } catch (error) {
         console.error(error);
       }
     };
-
+  
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Fetch readedChapters and progressChapters from AsyncStorage
+    const fetchChaptersStatus = async () => {
+      try {
+        const readedChaptersData = await AsyncStorage.getItem("readedChapters");
+        if (readedChaptersData) {
+          console.log("readedChaptersData", readedChaptersData);
+          const readedChaptersArray = JSON.parse(readedChaptersData);
+          setReadedChapters(readedChaptersArray);
+        } else {
+          console.log("readedChaptersData not found");
+          setReadedChapters([]);
+          await AsyncStorage.setItem("readedChapters", JSON.stringify([]));
+        }
+
+        const progressChaptersData = await AsyncStorage.getItem(
+          "progressChapters"
+        );
+        if (progressChaptersData) {
+          console.log("progressChaptersData", readedChaptersData);
+          const progressChaptersArray = JSON.parse(progressChaptersData);
+          setProgressChapters(progressChaptersArray);
+        } else {
+          setProgressChapters([]);
+          await AsyncStorage.setItem(
+            "progressChapters",
+            JSON.stringify([])
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching chapter statuses:", error);
+      }
+    };
+
+    fetchChaptersStatus();
+  }, []);
+  
 
   useEffect(() => {
     // Apply the filter when the activeFilter changes
@@ -73,45 +118,23 @@ const ChapterScraper = () => {
     GeologicaSemiBold: require("../assets/fonts/GeologicaSemiBold.ttf"),
     GeologicaLight: require("../assets/fonts/GeologicaLight.ttf"),
     GeologicaExtraLight: require("../assets/fonts/GeologicaExtraLight.ttf"),
-    GeologicaExtraLight: require("../assets/fonts/GeologicaRegular.ttf"),
+    GeologicaRegular: require("../assets/fonts/GeologicaRegular.ttf"),
   });
 
   if (!loaded) {
     return null;
   }
 
-  const generateFilters = () => {
-    const filters = [];
-    const totalItems = liElements.length;
-    const numFilters = Math.ceil(totalItems / 200);
+  
 
-    for (let i = 0; i < numFilters; i++) {
-      const start = i * 200 + 1;
-      const end = Math.min((i + 1) * 200, totalItems);
-      const filterText = `${start} à ${end}`;
-
-      filters.push(
-        <TouchableOpacity
-          key={i}
-          style={[
-            styles.filterButton,
-            activeFilter === filterText ? styles.activeFilterButton : null,
-          ]}
-          onPress={() => handleFilterPress(filterText)}
-        >
-          <Text style={styles.filterButtonText}>{filterText}</Text>
-        </TouchableOpacity>
-      );
-    }
-
-    return filters;
-  };
 
   const handleVariable = (value) => {
-    // Faites quelque chose avec la variable
     setActiveTab(value);
     console.log(value);
   };
+
+  console.log("readedChapters", readedChapters);
+  console.log("progressChapters", progressChapters);
 
   return (
     <View style={styles.container}>
@@ -123,6 +146,10 @@ const ChapterScraper = () => {
               key={index}
               item={item.text()}
               link={item.find("a").attr("href")}
+              readedChapters={readedChapters}
+              progressChapters={progressChapters}
+              setReadedChapters={setReadedChapters}
+              setProgressChapters={setProgressChapters}
             />
           ))}
         </View>
@@ -146,6 +173,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    maxWidth: "100%",
     paddingTop: 0,
     paddingBottom: 0,
   },
