@@ -1,15 +1,25 @@
-import React from 'react';
-import { View, Text, Image } from 'react-native';
-import ScanScraper from '../components/ScanScraper';
+import React from "react";
+import { View, Text, Image } from "react-native";
+import ScanScraper from "../components/ScanScraper";
+import { primaryColor } from "../hooks/styles";
 
 const ScansReader = ({ route }) => {
-  const { link } = route.params;
+  console.log(route.params);
+  const { link, handleSlideChange, currentSlide, totalSlides } = route.params;
+
 
   return (
-    <View>
-      <ScanScraper link={link} />
+    <View style={styles.container}>
+      <ScanScraper link={link} handleSlideChange={handleSlideChange}/>
     </View>
   );
+};
+
+const styles = {
+  container: {
+    backgroundColor: primaryColor,
+    height: "100%",
+  },
 };
 
 export default ScansReader;

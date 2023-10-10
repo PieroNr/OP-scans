@@ -1,37 +1,103 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView } from 'react-native';
-import axios from 'axios';
-import cheerio from 'cheerio';
-import ChapterButton from './ChapterButton';
-import Carousel from 'react-native-snap-carousel';
+import React, { useState, useEffect } from "react";
+import {
+  primaryColor,
+  secondaryColor,
+  colorText,
+} from "../hooks/styles";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import axios from "axios";
+import cheerio from "cheerio";
+import ChapterButton from "./ChapterButton";
+import MenuScan from "./MenuScan";
+import { useFonts } from "expo-font";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChapterScraper = () => {
   const [liElements, setLiElements] = useState([]);
   const [filteredLiElements, setFilteredLiElements] = useState([]);
   const [activeFilter, setActiveFilter] = useState(null);
+  const [activeTab, setActiveTab] = useState(true);
+  const [reversedFilteredLiElements, setReversedFilteredLiElements] = useState(
+    []
+  );
+  const [readedChapters, setReadedChapters] = useState([]);
+  const [progressChapters, setProgressChapters] = useState([]);
+
+  useEffect(() => {
+    // Mettre à jour reversedFilteredLiElements seulement lorsque filteredLiElements change
+    setReversedFilteredLiElements(filteredLiElements.reverse());
+  }, [filteredLiElements]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://www.scan-vf.net/one_piece');
+        const response = await axios.get("https://www.scan-vf.net/one_piece");
         const html = response.data;
         const $ = cheerio.load(html);
-        const liElements = $('ul.chapters').children('li').map((i, el) => $(el)).get();
-        
-        liElements.reverse();
-        setLiElements(liElements);
+        const fetchedLiElements = $("ul.chapters")
+          .children("li")
+          .map((i, el) => $(el))
+          .get();
+  
+        fetchedLiElements.reverse();
+  
+        setLiElements(fetchedLiElements);
       } catch (error) {
         console.error(error);
       }
     };
-
+  
     fetchData();
   }, []);
 
   useEffect(() => {
+    // Fetch readedChapters and progressChapters from AsyncStorage
+    const fetchChaptersStatus = async () => {
+      try {
+        const readedChaptersData = await AsyncStorage.getItem("readedChapters");
+        if (readedChaptersData) {
+          console.log("readedChaptersData", readedChaptersData);
+          const readedChaptersArray = JSON.parse(readedChaptersData);
+          setReadedChapters(readedChaptersArray);
+        } else {
+          console.log("readedChaptersData not found");
+          setReadedChapters([]);
+          await AsyncStorage.setItem("readedChapters", JSON.stringify([]));
+        }
+
+        const progressChaptersData = await AsyncStorage.getItem(
+          "progressChapters"
+        );
+        if (progressChaptersData) {
+          console.log("progressChaptersData", readedChaptersData);
+          const progressChaptersArray = JSON.parse(progressChaptersData);
+          setProgressChapters(progressChaptersArray);
+        } else {
+          setProgressChapters([]);
+          await AsyncStorage.setItem(
+            "progressChapters",
+            JSON.stringify([])
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching chapter statuses:", error);
+      }
+    };
+
+    fetchChaptersStatus();
+  }, []);
+  
+
+  useEffect(() => {
     // Apply the filter when the activeFilter changes
     if (activeFilter) {
-      const [start, end] = activeFilter.split(' à ');
+      const [start, end] = activeFilter.split(" à ");
       const filteredElements = liElements.filter((liElement, index) => {
         const liNumber = index + 1;
         return liNumber >= parseInt(start, 10) && liNumber <= parseInt(end, 10);
@@ -48,56 +114,57 @@ const ChapterScraper = () => {
     setActiveFilter(filter);
   };
 
-  const generateFilters = () => {
-    const filters = [];
-    const totalItems = liElements.length;
-    const numFilters = Math.ceil(totalItems / 200);
+  const [loaded] = useFonts({
+    GeologicaSemiBold: require("../assets/fonts/GeologicaSemiBold.ttf"),
+    GeologicaLight: require("../assets/fonts/GeologicaLight.ttf"),
+    GeologicaExtraLight: require("../assets/fonts/GeologicaExtraLight.ttf"),
+    GeologicaRegular: require("../assets/fonts/GeologicaRegular.ttf"),
+  });
 
-    for (let i = 0; i < numFilters; i++) {
-      const start = i * 200 + 1;
-      const end = Math.min((i + 1) * 200, totalItems);
-      const filterText = `${start} à ${end}`;
+  if (!loaded) {
+    return null;
+  }
 
-      filters.push(
-        <TouchableOpacity
-          key={i}
-          style={[
-            styles.filterButton,
-            activeFilter === filterText ? styles.activeFilterButton : null,
-          ]}
-          onPress={() => handleFilterPress(filterText)}
-        >
-          <Text style={styles.filterButtonText}>{filterText}</Text>
-        </TouchableOpacity>
-      );
-    }
+  
 
-    return filters;
+
+  const handleVariable = (value) => {
+    setActiveTab(value);
+    console.log(value);
   };
+
+  console.log("readedChapters", readedChapters);
+  console.log("progressChapters", progressChapters);
 
   return (
     <View style={styles.container}>
-      <View style={styles.filterList}>
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.filterContainer}
-        showsHorizontalScrollIndicator={false}
-        styles={styles.scrollView}
-      >{generateFilters()}</ScrollView>
-      </View>
-      <View style={styles.itemContainer}>
-      <FlatList
-        data={filteredLiElements.reverse()}
-        keyExtractor={(item, index) => index.toString()}
-        extraData={activeFilter}
-        renderItem={({ item }) =>  (
-          <View>
-            <ChapterButton item={item.text()} link={item.find('a').attr('href')}/>
-          </View>
-        )}
-      />
-      </View>
-      
+      <MenuScan onVariable={handleVariable} />
+      {activeTab ? (
+        <View style={styles.itemContainer}>
+          {reversedFilteredLiElements.map((item, index) => (
+            <ChapterButton
+              key={index}
+              item={item.text()}
+              link={item.find("a").attr("href")}
+              readedChapters={readedChapters}
+              progressChapters={progressChapters}
+              setReadedChapters={setReadedChapters}
+              setProgressChapters={setProgressChapters}
+            />
+          ))}
+        </View>
+      ) : (
+        <View style={styles.filterList}>
+          <ScrollView
+            horizontal
+            contentContainerStyle={styles.filterContainer}
+            showsHorizontalScrollIndicator={false}
+            styles={styles.scrollView}
+          >
+            {generateFilters()}
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 };
@@ -106,44 +173,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    maxWidth: "100%",
+    paddingTop: 0,
     paddingBottom: 0,
   },
   filterContainer: {
     marginBottom: 20,
-    
   },
   filterButton: {
     paddingVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#e91e63',
-    borderRadius: 5,
+    backgroundColor: primaryColor,
     marginHorizontal: 5,
     height: 40,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
+    borderColor: secondaryColor,
+    borderWidth: 1,
   },
   activeFilterButton: {
-    backgroundColor: '#c2185b',
+    backgroundColor: secondaryColor,
   },
   filterButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: colorText,
+    fontFamily: "GeologicaSemiBold",
   },
   itemContainer: {
     flex: 1,
     paddingHorizontal: 10,
     paddingTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
   },
   liText: {
     marginBottom: 10,
   },
   filterList: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
     height: 50,
   },
-    });
+});
 
 export default ChapterScraper;
