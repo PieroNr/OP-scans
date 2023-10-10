@@ -126,7 +126,31 @@ const ChapterScraper = () => {
   }
 
   
+  const generateFilters = () => {
+    const filters = [];
+    const totalItems = liElements.length;
+    const numFilters = Math.ceil(totalItems / 200);
+    
+    for(let i = 0; i < numFilters; i++) {
+      const start = i * 200 + 1;
+      const end = Math.min((i + 1) * 200, totalItems);
+      const filter = `${start} à ${end}`;
 
+      filters.push(
+        <TouchableOpacity
+          key={i}
+          style={[styles.filterButton, activeFilter === filter ? styles.activeFilterButton : null]}
+          onPress={() => handleFilterPress(filter)}
+        >
+          <Text style={styles.filterButtonText}>{filter}</Text>
+        </TouchableOpacity>
+      );
+
+      
+    }
+
+    return filters;
+  };
 
   const handleVariable = (value) => {
     setActiveTab(value);
