@@ -2,22 +2,22 @@
   "cli": {
     "version": ">= 3.10.2"
   },
+  
   "build": {
     "development": {
-      "distribution": "internal",
-      "android": {
-        "gradleCommand": ":app:assembleDebug"
-      },
-      "ios": {
-        "buildConfiguration": "Debug"
-      }
+      "developmentClient": true,
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal"
     },
     "production": {}
-  },
+  }, 
+  
   "submit": {
-    "production": {}
+    "production": {
+    }
+
   }
+  
 }

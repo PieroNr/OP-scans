@@ -21,6 +21,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome } from "@expo/vector-icons";
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
+import { Skeleton } from '@rneui/themed';
+import { is } from "css-select";
+import { LinearGradient } from "expo-linear-gradient";
+import Colors from "../constants/Colors";
+import { set } from "react-native-reanimated";
 
 
 const ChapterScraper = () => {
@@ -36,6 +41,7 @@ const ChapterScraper = () => {
   const [progressChapters, setProgressChapters] = useState([]);
   const [downloadEnabled, setDownloadEnabled] = useState(false);
   const [downloadActivate, setDownloadActivate] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setReversedFilteredLiElements(filteredLiElements.reverse());
@@ -55,9 +61,11 @@ const ChapterScraper = () => {
         fetchedLiElements.reverse();
   
         setLiElements(fetchedLiElements);
+        setIsLoading(false);
       } catch (error) {
         console.error(error);
       }
+      
     };
   
     fetchData();
@@ -66,28 +74,12 @@ const ChapterScraper = () => {
   useEffect(() => {
 
     fetchChaptersStatus();
+
+    
   }, []);
   
 
-  useEffect(() => {
-    if (activeFilter) {
-      const [start, end] = activeFilter.split(" à ");
-      const filteredElements = liElements.filter((liElement, index) => {
-        const liNumber = index + 1;
-        return liNumber >= parseInt(start, 10) && liNumber <= parseInt(end, 10);
-      });
-      const filteredTexts = filteredElements.map((liElement) => liElement);
-      setFilteredLiElements(filteredTexts);
-    } else {
-      if (liElements.length !== 0) {
-        const numFilters = Math.ceil(liElements.length / 200);
-        setActiveFilter(`${(numFilters-1)*200+1} à ${liElements.length}`);
-    
-      }
-      const allTexts = liElements.map((liElement) => liElement);
-      setFilteredLiElements(allTexts);
-    }
-  }, [activeFilter, liElements]);
+  
 
   const fetchChaptersStatus = async () => {
     try {
@@ -122,6 +114,27 @@ const ChapterScraper = () => {
     setActiveFilter(filter);
     renderTheComponent();
   };
+  useEffect(() => {
+    if (activeFilter) {
+      const [start, end] = activeFilter.split(" à ");
+      const filteredElements = liElements.filter((liElement, index) => {
+        const liNumber = index + 1;
+        return liNumber >= parseInt(start, 10) && liNumber <= parseInt(end, 10);
+      });
+      const filteredTexts = filteredElements.map((liElement) => liElement);
+      setFilteredLiElements(filteredTexts);
+    } else {
+      if (liElements.length !== 0) {
+        const numFilters = Math.ceil(liElements.length / 200);
+        setActiveFilter(`${(numFilters-1)*200+1} à ${liElements.length}`);
+        
+
+    
+      }
+      const allTexts = liElements.map((liElement) => liElement);
+      setFilteredLiElements(allTexts);
+    }
+  }, [activeFilter, liElements]);
 
   const [loaded] = useFonts({
     GeologicaSemiBold: require("../assets/fonts/GeologicaSemiBold.ttf"),
@@ -220,8 +233,6 @@ const ChapterScraper = () => {
             </View>
       );
     });
-    
-
     return chapterButtons;
   }
 
@@ -237,17 +248,36 @@ const ChapterScraper = () => {
   const handleVariable = (value) => {
     setActiveTab(value);
   };
+
+  
   
   return (
     <View style={styles.container}>
       <MenuScan onVariable={handleVariable} />
       <View style={styles.filterList}>
+        {isLoading && (
+          <View style={{ flexDirection: 'row'}} >
+            {[...Array(4).keys()].map((index) => (
+              <Skeleton
+                LinearGradientComponent={() => (
+                  <LinearGradient colors={['#343434', '#5A5A5A', '#343434']} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
+                )}
+                
+                animation="wave"
+                width="30%"
+                height={40}
+                style={{ marginHorizontal: 5, backgroundColor: "#343434", borderRadius: 0 }}
+              />
+            ))}
+          </View>
+        )}
           <ScrollView
             horizontal
             contentContainerStyle={styles.filterContainer}
             showsHorizontalScrollIndicator={false}
             styles={styles.scrollView}
           >
+            
             {generateFilters()}
           </ScrollView>
         </View>
@@ -263,9 +293,26 @@ const ChapterScraper = () => {
            textStyle={[{color: colorText, fontFamily: "GeologicaSemiBold"}]}
            
          />
+         {isLoading && (
+            <View style={{paddingHorizontal: 10}}>
+              {[...Array(10).keys()].map((index) => (
+                <Skeleton
+                  LinearGradientComponent={() => (
+                    <LinearGradient colors={['#343434', '#5A5A5A', '#343434']} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
+                  )}
+                  animation="wave"
+                  width="100%"
+                  height={60}
+                  style={{ marginBottom: 10, backgroundColor: "#343434", borderRadius: 0 }}
+                />
+              ))}
+            </View>
+          )}
       {activeTab ? (
         <View style={styles.itemContainer}>
-          {generateChapterButtons()}
+           
+              {generateChapterButtons()}
+            
         </View>
       ) : (
         <View></View>
